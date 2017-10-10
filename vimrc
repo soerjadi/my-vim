@@ -107,7 +107,7 @@ function! MyFoldText()
     let fillcharcount = windowwidth - len(line) - len(foldedlinecount) - 4
     return line . ' …' . repeat(" ",fillcharcount) . foldedlinecount . ' '
 endfunction
-" set foldtext=MyFoldText()
+set foldtext=MyFoldText()
 
 " Mappings to easily toggle fold levels
 nnoremap z0 :set foldlevel=0<cr>
@@ -304,9 +304,6 @@ vnoremap <Space> za
 " Strip all trailing whitespace from a file, using ,W
 nnoremap <leader>W :%s/\s\+$//<CR>:let @/=''<CR>
 
-" Strip all trailing whitespace from a file, using ,W
-nnoremap <leader>W :%s/\s\+$//<CR>:let @/=''<CR>
-
 " Use The Silver Searcher over grep, iff possible
 if executable('ag')
    " Use ag over grep
@@ -360,7 +357,6 @@ let NERDTreeShowHidden=1
 " Quit on opening files from the tree
 let NERDTreeQuitOnOpen=1
 
-
 " Highlight the selected entry in the tree
 let NERDTreeHighlightCursorline=1
 
@@ -374,6 +370,9 @@ let NERDTreeIgnore=[ '\.pyc$', '\.pyo$', '\.py\$class$', '\.obj$',
 
 " }}}
 
+" vim-flake8 default configuration
+let g:flake8_show_in_gutter=1
+
 " Conflict markers {{{
 " highlight conflict markers
 match ErrorMsg '^\(<\|=\|>\)\{7\}\([^=].\+\)\?$'
@@ -382,26 +381,10 @@ match ErrorMsg '^\(<\|=\|>\)\{7\}\([^=].\+\)\?$'
 nnoremap <silent> <leader>c /^\(<\\|=\\|>\)\{7\}\([^=].\+\)\?$<CR>
 " }}}
 
-" Skeleton processing {{{
 
-if has("autocmd")
-
-    "if !exists('*LoadTemplate')
-    "function LoadTemplate(file)
-        "" Add skeleton fillings for Python (normal and unittest) files
-        "if a:file =~ 'test_.*\.py$'
-            "execute "0r ~/.vim/skeleton/test_template.py"
-        "elseif a:file =~ '.*\.py$'
-            "execute "0r ~/.vim/skeleton/template.py"
-        "endif
-    "endfunction
-    "endif
-
-    "autocmd BufNewFile * call LoadTemplate(@%)
-
-endif " has("autocmd")
-
-" }}}
+let g:airline_theme='one'
+colorscheme one
+set background=dark
 
 " Restore cursor position upon reopening files {{{
 autocmd BufReadPost *
@@ -424,7 +407,220 @@ au filetype vim set formatoptions-=o
                      " for vim files, so explicitly unset it again
 " }}}
 
+" Extra user or machine specific settings {{{
+source ~/.vim/user.vim
+" }}}
 
-let g:airline_theme='one'
-colorscheme one
-set background=dark
+" Creating underline/overline headings for markup languages
+" Inspired by http://sphinx.pocoo.org/rest.html#sections
+nnoremap <leader>1 yyPVr=jyypVr=
+nnoremap <leader>2 yyPVr*jyypVr*
+nnoremap <leader>3 yypVr=
+nnoremap <leader>4 yypVr-
+nnoremap <leader>5 yypVr^
+nnoremap <leader>6 yypVr"
+
+iab lorem Lorem ipsum dolor sit amet, consectetur adipiscing elit
+iab llorem Lorem ipsum dolor sit amet, consectetur adipiscing elit.  Etiam lacus ligula, accumsan id imperdiet rhoncus, dapibus vitae arcu.  Nulla non quam erat, luctus consequat nisi
+iab lllorem Lorem ipsum dolor sit amet, consectetur adipiscing elit.  Etiam lacus ligula, accumsan id imperdiet rhoncus, dapibus vitae arcu.  Nulla non quam erat, luctus consequat nisi.  Integer hendrerit lacus sagittis erat fermentum tincidunt.  Cras vel dui neque.  In sagittis commodo luctus.  Mauris non metus dolor, ut suscipit dui.  Aliquam mauris lacus, laoreet et consequat quis, bibendum id ipsum.  Donec gravida, diam id imperdiet cursus, nunc nisl bibendum sapien, eget tempor neque elit in tortor
+
+"set guifont=Anonymous\ for\ Powerline:h12 linespace=2
+"set guifont=Droid\ Sans\ Mono:h14 linespace=0
+"set guifont=Mensch\ for\ Powerline:h14 linespace=0
+"set guifont=saxMono:h14 linespace=3
+"set guifont=Ubuntu\ Mono:h18 linespace=3
+set guifont=Source\ Code\ Pro\ Light:h10 linespace=0
+
+if has("gui_running")
+    " Remove toolbar, left scrollbar and right scrollbar
+    set guioptions-=T
+    set guioptions-=l
+    set guioptions-=L
+    set guioptions-=r
+    set guioptions-=R
+    set guifont=Source\ Code\ Pro\ Light:h13 linespace=0
+else
+    set bg=dark
+endif
+
+" Pulse ------------------------------------------------------------------- {{{
+
+function! PulseCursorLine()
+    let current_window = winnr()
+
+    windo set nocursorline
+    execute current_window . 'wincmd w'
+
+    setlocal cursorline
+
+    redir => old_hi
+        silent execute 'hi CursorLine'
+    redir END
+    let old_hi = split(old_hi, '\n')[0]
+    let old_hi = substitute(old_hi, 'xxx', '', '')
+
+    hi CursorLine guibg=#3a3a3a
+    redraw
+    sleep 20m
+
+    hi CursorLine guibg=#4a4a4a
+    redraw
+    sleep 30m
+
+    hi CursorLine guibg=#3a3a3a
+    redraw
+    sleep 30m
+
+    hi CursorLine guibg=#2a2a2a
+    redraw
+    sleep 20m
+
+    execute 'hi ' . old_hi
+
+    windo set cursorline
+    execute current_window . 'wincmd w'
+endfunction
+
+" }}}
+
+" Powerline configuration ------------------------------------------------- {{{
+
+let g:Powerline_symbols = 'compatible'
+"let g:Powerline_symbols = 'fancy'
+
+" }}}
+
+" Ignore common directories
+let g:ctrlp_custom_ignore = {
+   \ 'dir': 'node_modules\|bower_components',
+   \ }
+
+" Invoke CtrlP, but CommandT style
+nnoremap <leader>t :CtrlP<cr>
+nnoremap <leader>. :CtrlPTag<cr>
+nnoremap <leader>b :CtrlPBuffer<cr>
+
+" Learn Vim Script the Hard Way Exercises
+"noremap - ddp
+"noremap _ ddkP
+
+" C-U in insert/normal mode, to uppercase the word under cursor
+inoremap <c-u> <esc>viwUea
+nnoremap <c-u> viwUe
+
+iabbr m@@ me@nvie.com
+iabbr v@@ vincent@3rdcloud.com
+iabbr ssig --<cr>Vincent Driessen<cr>vincent@3rdcloud.com
+
+" Quote words under cursor
+nnoremap <leader>" viW<esc>a"<esc>gvo<esc>i"<esc>gvo<esc>3l
+nnoremap <leader>' viW<esc>a'<esc>gvo<esc>i'<esc>gvo<esc>3l
+
+" Quote current selection
+" TODO: This only works for selections that are created "forwardly"
+vnoremap <leader>" <esc>a"<esc>gvo<esc>i"<esc>gvo<esc>ll
+vnoremap <leader>' <esc>a'<esc>gvo<esc>i'<esc>gvo<esc>ll
+
+" Use shift-H and shift-L for move to beginning/end
+nnoremap H 0
+nnoremap L $
+
+" Define operator-pending mappings to quickly apply commands to function names
+" and/or parameter lists in the current line
+onoremap inf :<c-u>normal! 0f(hviw<cr>
+onoremap anf :<c-u>normal! 0f(hvaw<cr>
+onoremap in( :<c-u>normal! 0f(vi(<cr>
+onoremap an( :<c-u>normal! 0f(va(<cr>
+
+" "Next" tag
+onoremap int :<c-u>normal! 0f<vit<cr>
+onoremap ant :<c-u>normal! 0f<vat<cr>
+
+" Function argument selection (change "around argument", change "inside argument")
+onoremap ia :<c-u>execute "normal! ?[,(]\rwv/[),]\rh"<cr>
+vnoremap ia :<c-u>execute "normal! ?[,(]\rwv/[),]\rh"<cr>
+
+" Split previously opened file ('#') in a split window
+nnoremap <leader>sh :execute "leftabove vsplit" bufname('#')<cr>
+nnoremap <leader>sl :execute "rightbelow vsplit" bufname('#')<cr>
+
+" Grep searches
+"nnoremap <leader>g :silent execute "grep! -R " . shellescape('<cword>') . " ."<cr>:copen 12<cr>
+"nnoremap <leader>G :silent execute "grep! -R " . shellescape('<cWORD>') . " ."<cr>:copen 12<cr>
+
+" Rope config
+nnoremap <leader>A :RopeAutoImport<cr>
+
+" Switch from block-cursor to vertical-line-cursor when going into/out of
+" insert mode
+let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+
+" Configure vim-expand-region, for easy selection precision
+vmap v <Plug>(expand_region_expand)
+vmap <C-v> <Plug>(expand_region_shrink)
+
+" Configure ArgWrap
+let g:argwrap_tail_comma = 1
+nnoremap <leader>w :ArgWrap<cr>
+
+" Default settings. (NOTE: Remove comments in dictionary before sourcing)
+let g:expand_region_text_objects = {
+   \ 'iw' :0,
+   \ 'i"' :0,
+   \ 'i''' :0,
+   \ 'a"' :0,
+   \ 'a''' :0,
+   \ 'i)' :1,
+   \ 'i}' :1,
+   \ 'i]' :1,
+   \ 'a)' :1,
+   \ 'a}' :1,
+   \ 'a]' :1,
+   \ }
+
+" HTML specific region expansions
+call expand_region#custom_text_objects('html', {
+   \ 'it': 1,
+   \ 'at': 1,
+   \ })
+
+" Syntastic config {{{
+
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 0
+let g:syntastic_check_on_wq = 0
+
+let g:syntastic_html_checkers = []
+let g:syntastic_javascript_checkers = ['eslint']
+let g:syntastic_typescript_tsc_args = '--target ES2015'
+
+" }}}
+
+" {{{ Auto-format Elm source files upon save
+let g:elm_format_autosave = 1
+" }}}
+
+" {{{ Check JS with Flow
+" let g:flow#enable = 0
+let g:flow#autoclose = 1
+let g:flow#errjmp = 1
+" }}}
+
+" TypeScript settings {{{
+
+" let g:typescript_compiler_binary = 'tsc'
+" let g:typescript_compiler_options = '--target es2015'
+
+" }}}
+
+" NeoFormat rules {{{
+
+let g:neoformat_try_formatprg = 1
+
+" }}}
