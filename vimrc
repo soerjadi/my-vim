@@ -304,11 +304,14 @@ vnoremap <Space> za
 " Strip all trailing whitespace from a file, using ,W
 nnoremap <leader>W :%s/\s\+$//<CR>:let @/=''<CR>
 
+" Shortcut to toggle NERDTRee
+nnoremap nt :NERDTreeToggle
+
 " Use The Silver Searcher over grep, iff possible
 if executable('ag')
    " Use ag over grep
    set grepprg=ag\ --nogroup\ --nocolor
-
+                                                  
    " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
    let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
 
